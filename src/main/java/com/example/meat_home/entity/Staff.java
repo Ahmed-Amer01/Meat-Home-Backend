@@ -38,6 +38,10 @@ public class Staff {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    @Builder.Default
+    @Column(name = "token_version")
+    private Integer tokenVersion = 0;
+
     public enum Role {
         ADMIN,
         CALLCENTER,

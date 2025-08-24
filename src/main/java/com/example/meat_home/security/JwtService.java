@@ -18,14 +18,24 @@ public class JwtService {
     }
 
     // generae JWT token
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, String role, int version) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("version", version) //add version claim
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public Integer extractVersion(String token) {
+        return (Integer) Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("version");
     }
 
     // extract email from JWT token

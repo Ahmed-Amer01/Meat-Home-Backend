@@ -84,17 +84,44 @@ public class AuthService {
         // Staff login
         Staff staff = staffRepo.findByEmail(request.getEmail()).orElse(null);
         if (staff != null && passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
-            String token = jwtService.generateToken(staff.getEmail(), staff.getRole().name().toUpperCase());
+            String token = jwtService.generateToken(
+                staff.getEmail(),
+                staff.getRole().name().toUpperCase(),
+                staff.getTokenVersion() // send token version
+            );
             return new LoginResponse(token);
         }
 
         // Customer login
         Customer customer = customerRepo.findByEmail(request.getEmail()).orElse(null);
         if (customer != null && passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-            String token = jwtService.generateToken(customer.getEmail(), "CUSTOMER");
+            String token = jwtService.generateToken(
+                customer.getEmail(),
+                "CUSTOMER",
+                customer.getTokenVersion()
+            );
             return new LoginResponse(token);
         }
 
         throw new RuntimeException("Invalid email or password");
+    }
+
+    // Logout
+    public void logout(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String email = jwtService.extractEmail(token);
+            String role = jwtService.extractRole(token);
+
+            if ("CUSTOMER".equalsIgnoreCase(role)) {
+                Customer customer = customerRepo.findByEmail(email).orElseThrow();
+                customer.setTokenVersion(customer.getTokenVersion() + 1);
+                customerRepo.save(customer);
+            } else {
+                Staff staff = staffRepo.findByEmail(email).orElseThrow();
+                staff.setTokenVersion(staff.getTokenVersion() + 1);
+                staffRepo.save(staff);
+            }
+        }
     }
 }

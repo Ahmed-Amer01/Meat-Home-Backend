@@ -10,6 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.meat_home.repository.CustomerRepository;
+import com.example.meat_home.repository.StaffRepository;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -17,9 +20,15 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final CustomerRepository customerRepo;
+    private final StaffRepository staffRepo;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   CustomerRepository customerRepo,
+                                   StaffRepository staffRepo) {
         this.jwtService = jwtService;
+        this.customerRepo = customerRepo;
+        this.staffRepo = staffRepo;
     }
 
     @Override
@@ -42,6 +51,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String email = jwtService.extractEmail(token);
                 String role = jwtService.extractRole(token);
+                Integer tokenVersion = jwtService.extractVersion(token);
+
+                // Check token version against DB
+                boolean valid = false;
+                if ("CUSTOMER".equalsIgnoreCase(role)) {
+                    var customer = customerRepo.findByEmail(email).orElse(null);
+                    if (customer != null && customer.getTokenVersion().equals(tokenVersion)) {
+                        valid = true;
+                    }
+                } else {
+                    var staff = staffRepo.findByEmail(email).orElse(null);
+                    if (staff != null && staff.getTokenVersion().equals(tokenVersion)) {
+                        valid = true;
+                    }
+                }
+
+                if (!valid) {
+                    throw new RuntimeException("Token expired due to logout or reset");
+                }
 
                 // convert role to uppercase to  prevent case sensitivity issues
                 List<SimpleGrantedAuthority> authorities =

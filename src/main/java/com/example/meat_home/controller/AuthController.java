@@ -46,4 +46,15 @@ public class AuthController {
                                 .body(new ErrorResponse("Server error", 500));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        try {
+            authService.logout(authHeader);
+            return ResponseEntity.ok("Logged out successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ErrorResponse("Logout failed", 500));
+        }
+    }
 }

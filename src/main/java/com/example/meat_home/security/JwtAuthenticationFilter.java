@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // السماح بـ CORS preflight
+        // Allow CORS preflight
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
@@ -43,18 +43,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtService.extractEmail(token);
                 String role = jwtService.extractRole(token);
 
-                // تحويل role إلى uppercase لتجنب مشاكل Spring Security
+                // convert role to uppercase to  prevent case sensitivity issues
                 List<SimpleGrantedAuthority> authorities =
                         List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
 
-                // إنشاء Authentication object
+                // Create Authentication object
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(email, null, authorities);
 
-                // حفظ Authentication في الـ SecurityContext
+                // Save Authentication in SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } catch (Exception e) {
-                // ارسال JSON response عند فشل التوكن
+                // Send JSON response for invalid token
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");

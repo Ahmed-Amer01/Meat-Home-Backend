@@ -1,11 +1,9 @@
 package com.example.meat_home.controller;
 
-import com.example.meat_home.dto.Category.CategoryDto;
 import com.example.meat_home.dto.Product.CreateProductDto;
 import com.example.meat_home.dto.Product.ProductDto;
 import com.example.meat_home.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

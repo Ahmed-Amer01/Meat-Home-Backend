@@ -1,6 +1,7 @@
 package com.example.meat_home.controller;
 
-import com.example.meat_home.dto.ErrorResponse;
+import com.example.meat_home.dto.Admin.ToggleUserStatusRequest;
+import com.example.meat_home.dto.Error.ErrorResponse;
 import com.example.meat_home.entity.Customer;
 import com.example.meat_home.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -31,19 +32,21 @@ public class AdminController {
         }
     }
 
-    // Activate / Deactivate a customer
-    @PatchMapping("/customers/{id}/status")
+    @PatchMapping("/users/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> toggleCustomerStatus(@PathVariable Long id) {
+    public ResponseEntity<?> toggleUserStatus(
+            @PathVariable Long id,
+            @RequestBody ToggleUserStatusRequest request // "customer" or "staff"
+    ) {
         try {
-            Customer customer = adminService.toggleCustomerStatus(id);
-            return ResponseEntity.ok(customer); // 200 OK
+            Object updatedUser = adminService.toggleUserStatus(id, request.getType());
+            return ResponseEntity.ok(updatedUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(new ErrorResponse(e.getMessage(), 400));
+                    .body(new ErrorResponse(e.getMessage(), 400));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(new ErrorResponse("Server error", 500));
+                    .body(new ErrorResponse("Server error", 500));
         }
     }
 }

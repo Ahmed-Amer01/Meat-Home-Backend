@@ -4,7 +4,6 @@ import com.example.meat_home.dto.Category.CategoryDto;
 import com.example.meat_home.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 

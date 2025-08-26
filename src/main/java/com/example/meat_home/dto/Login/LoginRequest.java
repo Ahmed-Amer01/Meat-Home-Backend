@@ -1,4 +1,4 @@
-package com.example.meat_home.dto;
+package com.example.meat_home.dto.Login;
 
 import lombok.*;
 

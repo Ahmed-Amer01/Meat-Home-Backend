@@ -1,9 +1,9 @@
 package com.example.meat_home.controller;
 
-import com.example.meat_home.dto.ErrorResponse;
-import com.example.meat_home.dto.LoginRequest;
-import com.example.meat_home.dto.LoginResponse;
-import com.example.meat_home.dto.SignupRequest;
+import com.example.meat_home.dto.Error.ErrorResponse;
+import com.example.meat_home.dto.Login.LoginRequest;
+import com.example.meat_home.dto.Login.LoginResponse;
+import com.example.meat_home.dto.Signup.SignupRequest;
 import com.example.meat_home.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

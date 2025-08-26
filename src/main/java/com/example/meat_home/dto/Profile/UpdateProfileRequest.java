@@ -1,6 +1,7 @@
-package com.example.meat_home.dto;
+package com.example.meat_home.dto.Profile;
 
 import lombok.*;
+
 import java.time.LocalDate;
 
 @Getter
@@ -8,12 +9,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SignupRequest {
+public class UpdateProfileRequest {
     private String name;
     private String email;
-    private String password;
     private String phone;
+    private String password;
     private LocalDate dateOfBirth;
-    private String type; // "customer" or "staff"
-    private String role; // optional, if he is a staff
 }

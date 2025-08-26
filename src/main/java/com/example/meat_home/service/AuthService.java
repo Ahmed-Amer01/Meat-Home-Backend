@@ -1,8 +1,8 @@
 package com.example.meat_home.service;
 
-import com.example.meat_home.dto.LoginRequest;
-import com.example.meat_home.dto.LoginResponse;
-import com.example.meat_home.dto.SignupRequest;
+import com.example.meat_home.dto.Login.LoginRequest;
+import com.example.meat_home.dto.Login.LoginResponse;
+import com.example.meat_home.dto.Signup.SignupRequest;
 import com.example.meat_home.entity.Customer;
 import com.example.meat_home.entity.Staff;
 import com.example.meat_home.repository.CustomerRepository;
@@ -88,10 +88,14 @@ public class AuthService {
         // Staff login
         Staff staff = staffRepo.findByEmail(request.getEmail()).orElse(null);
         if (staff != null && passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
+            // Increment token version to invalidate old tokens
+            staff.setTokenVersion(staff.getTokenVersion() + 1);
+            staffRepo.save(staff);
+
             String token = jwtService.generateToken(
                 staff.getEmail(),
                 staff.getRole().name().toUpperCase(),
-                staff.getTokenVersion() // send token version
+                staff.getTokenVersion() // send the new token version
             );
             return new LoginResponse(token);
         }
@@ -99,6 +103,10 @@ public class AuthService {
         // Customer login
         Customer customer = customerRepo.findByEmail(request.getEmail()).orElse(null);
         if (customer != null && passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
+            // Increment token version to invalidate old tokens
+            customer.setTokenVersion(customer.getTokenVersion() + 1);
+            customerRepo.save(customer);
+            
             String token = jwtService.generateToken(
                 customer.getEmail(),
                 "CUSTOMER",

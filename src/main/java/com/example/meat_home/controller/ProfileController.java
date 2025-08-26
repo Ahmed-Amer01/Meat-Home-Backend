@@ -6,6 +6,7 @@ import com.example.meat_home.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +17,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PatchMapping("/update")
+    @PreAuthorize("hasAnyRole('ADMIN','CALLCENTER','DELIVERY','CUSTOMER')")
     public ResponseEntity<?> updateProfile(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody UpdateProfileRequest request

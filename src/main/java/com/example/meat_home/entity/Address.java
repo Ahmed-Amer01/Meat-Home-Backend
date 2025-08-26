@@ -2,7 +2,6 @@ package com.example.meat_home.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 @Entity
 @Table(name = "Address")
 @Getter
@@ -20,7 +19,7 @@ public class Address {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Region region;
+    private RegionEnum region;
 
     private Integer stNumber;
     private String stName;
@@ -29,34 +28,4 @@ public class Address {
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
-
-    public enum Region {
-        Cairo,
-        Giza,
-        Alexandria,
-        Port_Said,
-        Suez,
-        Damietta,
-        Dakahlia,
-        Sharqia,
-        Qalyubia,
-        Kafr_El_Sheikh,
-        Gharbia,
-        Monufia,
-        Beheira,
-        Ismailia,
-        Minya,
-        Beni_Suef,
-        Faiyum,
-        Assiut,
-        Sohag,
-        Qena,
-        Luxor,
-        Aswan,
-        Red_Sea,
-        New_Valley,
-        Matrouh,
-        North_Sinai,
-        South_Sinai
-    }
 }

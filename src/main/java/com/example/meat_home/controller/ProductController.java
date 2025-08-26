@@ -1,9 +1,13 @@
 package com.example.meat_home.controller;
 
+import com.example.meat_home.dto.Category.CategoryDto;
+import com.example.meat_home.dto.Category.CategoryProductsDto;
 import com.example.meat_home.dto.Product.CreateProductDto;
 import com.example.meat_home.dto.Product.ProductDto;
+import com.example.meat_home.service.CategoryService;
 import com.example.meat_home.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +21,7 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductService productService;
-
+    private final CategoryService categoryService;
     @GetMapping
     public ResponseEntity<List<ProductDto>> getProducts() {
         return ResponseEntity.ok(productService.getProducts());
@@ -27,6 +31,11 @@ public class ProductController {
     public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
         ProductDto product = productService.getProductById(id);
         return product != null ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<CategoryProductsDto>> getProductsWithCategories() {
+        return ResponseEntity.ok(productService.getCategoriesWithProducts());
     }
 
     @PostMapping

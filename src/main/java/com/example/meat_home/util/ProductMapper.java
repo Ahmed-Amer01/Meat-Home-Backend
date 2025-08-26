@@ -1,6 +1,7 @@
 package com.example.meat_home.util;
 
 import com.example.meat_home.dto.Product.ProductDto;
+import com.example.meat_home.dto.Product.RawProduct;
 import com.example.meat_home.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,15 +24,14 @@ public class ProductMapper {
         return dto;
     }
 
-    public Product toEntity(ProductDto dto) {
-        if (dto == null) return null;
+    public RawProduct toSummaryDto(Product product) {
+        if (product == null) return null;
 
-        Product prod = new Product();
-        prod.setId(dto.getId());
-        prod.setName(dto.getName());
-        prod.setDisc(dto.getDisc());
-        prod.setPrice(dto.getPrice());
-        prod.setCategory(categoryMapper.toEntity(dto.getCategory()));
-        return prod;
+        RawProduct dto = new RawProduct();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setDisc(product.getDisc());
+        dto.setPrice(product.getPrice());
+        return dto;
     }
 }

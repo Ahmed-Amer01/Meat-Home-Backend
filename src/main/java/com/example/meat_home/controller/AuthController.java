@@ -1,9 +1,11 @@
 package com.example.meat_home.controller;
 
-import com.example.meat_home.dto.*;
+import com.example.meat_home.dto.ErrorResponse;
+import com.example.meat_home.dto.LoginRequest;
+import com.example.meat_home.dto.LoginResponse;
+import com.example.meat_home.dto.SignupRequest;
 import com.example.meat_home.service.AuthService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

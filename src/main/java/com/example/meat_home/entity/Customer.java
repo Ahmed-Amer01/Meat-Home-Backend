@@ -32,12 +32,16 @@ public class Customer {
     private LocalDate dateOfBirth;
 
     @Builder.Default
-    private Boolean isActive = true;
-
-    @Builder.Default
     @Column(name = "token_version")
     private Integer tokenVersion = 0;
 
+    @Builder.Default
+    private Boolean isActive = true;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
+
 }

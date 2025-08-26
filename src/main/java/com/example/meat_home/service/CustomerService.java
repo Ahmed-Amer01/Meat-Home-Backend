@@ -16,10 +16,6 @@ public class CustomerService {
     private final CustomerRepository customerRepo;
     private final CustomerMapper customerMapper;
 
-
-    public Customer findById(Long id) {
-        return customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
-    }
     /** Get all customers as DTOs */
     public List<CustomerDto> getCustomers() {
         return customerRepo.findAll()

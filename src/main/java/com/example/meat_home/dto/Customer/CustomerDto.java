@@ -20,5 +20,6 @@ public class CustomerDto {
     private LocalDate dateOfBirth;
     private String password;
     @JsonProperty("orders_id")
-    private List<Long> orders_id;
+    private List<Long> order_id;
+    private List<Long> address_id;
 }

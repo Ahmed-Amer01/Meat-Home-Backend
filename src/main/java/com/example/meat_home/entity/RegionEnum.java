@@ -1,0 +1,31 @@
+package com.example.meat_home.entity;
+
+public enum RegionEnum {
+    Cairo,
+    Giza,
+    Alexandria,
+    Port_Said,
+    Suez,
+    Damietta,
+    Dakahlia,
+    Sharqia,
+    Qalyubia,
+    Kafr_El_Sheikh,
+    Gharbia,
+    Monufia,
+    Beheira,
+    Ismailia,
+    Minya,
+    Beni_Suef,
+    Faiyum,
+    Assiut,
+    Sohag,
+    Qena,
+    Luxor,
+    Aswan,
+    Red_Sea,
+    New_Valley,
+    Matrouh,
+    North_Sinai,
+    South_Sinai
+}

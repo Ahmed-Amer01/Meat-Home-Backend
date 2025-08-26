@@ -30,13 +30,6 @@ public class CustomerController {
                 : ResponseEntity.notFound().build();
     }
 
-    @PostMapping
-    public ResponseEntity<CustomerDto> createCustomer(@RequestBody CustomerDto orderDto, UriComponentsBuilder uriBuilder) {
-        CustomerDto created = customerService.createCustomer(orderDto);
-        URI uri = uriBuilder.path("/api/customers/{id}").buildAndExpand(created.getId()).toUri();
-        return ResponseEntity.created(uri).body(created);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         boolean deleted = customerService.deleteCustomerById(id);

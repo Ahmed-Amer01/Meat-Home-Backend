@@ -1,5 +1,6 @@
 package com.example.meat_home.dto.Customer;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class CustomerDto {
     private String phone;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
+    @JsonIgnore
     private String password;
     @JsonProperty("orders_id")
     private List<Long> order_id;

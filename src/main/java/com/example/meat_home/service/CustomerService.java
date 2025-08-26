@@ -31,15 +31,7 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
-    /** Create a new active customer */
-    public CustomerDto createCustomer(CustomerDto dto) {
-        if (dto == null) return null;
-
-        Customer customer = customerMapper.toEntity(dto);
-        customer.setIsActive(true);
-        Customer saved = customerRepo.save(customer);
-        return customerMapper.toDto(saved);
-    }
+    // Create Customer handled in signup request //
 
     /** Delete customer by ID */
     public boolean deleteCustomerById(Long id) {
@@ -65,7 +57,6 @@ public class CustomerService {
         if (dto.getName() != null) customer.setName(dto.getName());
         if (dto.getEmail() != null) customer.setEmail(dto.getEmail());
         if (dto.getPhone() != null) customer.setPhone(dto.getPhone());
-        if (dto.getPassword() != null) customer.setPassword(dto.getPassword());
         if (dto.getDateOfBirth() != null) customer.setDateOfBirth(dto.getDateOfBirth());
 
         Customer savedCustomer = customerRepo.save(customer);

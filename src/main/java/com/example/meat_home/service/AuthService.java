@@ -1,14 +1,22 @@
 package com.example.meat_home.service;
 
-import com.example.meat_home.dto.Login.LoginRequest;
-import com.example.meat_home.dto.Login.LoginResponse;
-import com.example.meat_home.dto.Signup.SignupRequest;
+import com.example.meat_home.dto.Auth.LoginRequest;
+import com.example.meat_home.dto.Auth.LoginResponse;
+import com.example.meat_home.dto.Auth.OtpRequest;
+import com.example.meat_home.dto.Auth.ResetPasswordRequest;
+import com.example.meat_home.dto.Auth.SignupRequest;
 import com.example.meat_home.entity.Customer;
+import com.example.meat_home.entity.PasswordResetToken;
 import com.example.meat_home.entity.Staff;
 import com.example.meat_home.repository.CustomerRepository;
+import com.example.meat_home.repository.PasswordResetTokenRepository;
 import com.example.meat_home.repository.StaffRepository;
 import com.example.meat_home.security.JwtService;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Random;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +26,9 @@ public class AuthService {
 
     private final CustomerRepository customerRepo;
     private final StaffRepository staffRepo;
+    private final PasswordResetTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
     private final JwtService jwtService;
 
     // Signup
@@ -116,6 +126,84 @@ public class AuthService {
         }
 
         throw new RuntimeException("Invalid email or password");
+    }
+
+    // Request OTP to reset password
+    public void requestPasswordReset(OtpRequest request) {
+        String email = request.getEmail();
+
+        // check if user exists (customer or staff)
+        boolean exists = customerRepo.existsByEmail(email) || staffRepo.existsByEmail(email);
+        if (!exists) {
+            throw new RuntimeException("No account found with this email");
+        }
+
+        // generate 6-digit OTP
+        String otp = String.format("%06d", new Random().nextInt(999999));
+
+        // check if OTP already exists for this email
+        PasswordResetToken token = tokenRepo.findByEmail(email).orElse(null);
+
+        if (token != null) {
+            // update existing token
+            token.setOtp(otp);
+            token.setExpiry(LocalDateTime.now().plusMinutes(5));
+            token.setUsed(false);
+        } else {
+            // create new token
+            token = PasswordResetToken.builder()
+                    .email(email)
+                    .otp(otp)
+                    .expiry(LocalDateTime.now().plusMinutes(5))
+                    .used(false)
+                    .build();
+        }
+
+        tokenRepo.save(token);
+
+        // Send real email
+        emailService.sendOtp(email, otp);
+    }
+
+    // Reset password using OTP
+    public void resetPassword(ResetPasswordRequest request) {
+        String email = request.getEmail();
+        String otp = request.getOtp();
+
+        // Find latest OTP for this email
+        PasswordResetToken token = tokenRepo.findByEmailAndOtp(email, otp)
+                .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+
+        // Check if already used
+        if (token.isUsed()) {
+            throw new RuntimeException("OTP already used");
+        }
+
+        // Check expiry
+        if (token.getExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        // Mark token as used
+        token.setUsed(true);
+        tokenRepo.save(token);
+
+        // Update password in either staff or customer
+        Customer customer = customerRepo.findByEmail(email).orElse(null);
+        if (customer != null) {
+            customer.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            customerRepo.save(customer);
+            return;
+        }
+
+        Staff staff = staffRepo.findByEmail(email).orElse(null);
+        if (staff != null) {
+            staff.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            staffRepo.save(staff);
+            return;
+        }
+
+        throw new RuntimeException("Account not found for email: " + email);
     }
 
     // Logout

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-
     /** Get all categories */
     public List<CategoryDto> getCategories() {
         return categoryRepository.findAll()
@@ -30,6 +29,8 @@ public class CategoryService {
                 .map(categoryMapper::toDto)
                 .orElse(null);
     }
+
+
 
     /** Create a new category */
     public CategoryDto createCategory(CategoryDto dto) {

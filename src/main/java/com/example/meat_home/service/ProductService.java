@@ -1,4 +1,5 @@
 package com.example.meat_home.service;
+import com.example.meat_home.dto.Category.CategoryProductsDto;
 import com.example.meat_home.dto.Product.CreateProductDto;
 import com.example.meat_home.dto.Product.ProductDto;
 import com.example.meat_home.entity.Category;
@@ -32,6 +33,15 @@ public class ProductService {
         return productRepository.findById(id)
                 .map(productMapper::toDto)
                 .orElse(null);
+    }
+    public List<CategoryProductsDto> getCategoriesWithProducts() {
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream()
+                .map(c -> new CategoryProductsDto(
+                        c.getName(), c.getProducts().stream()
+                        .map(productMapper::toSummaryDto)
+                        .toList()))
+                .toList();
     }
 
     /** Create a new category */

@@ -1,4 +1,4 @@
-package com.example.meat_home.dto.Signup;
+package com.example.meat_home.dto.Auth;
 
 import lombok.*;
 import java.time.LocalDate;

@@ -1,9 +1,11 @@
 package com.example.meat_home.controller;
 
+import com.example.meat_home.dto.Auth.LoginRequest;
+import com.example.meat_home.dto.Auth.LoginResponse;
+import com.example.meat_home.dto.Auth.OtpRequest;
+import com.example.meat_home.dto.Auth.ResetPasswordRequest;
+import com.example.meat_home.dto.Auth.SignupRequest;
 import com.example.meat_home.dto.Error.ErrorResponse;
-import com.example.meat_home.dto.Login.LoginRequest;
-import com.example.meat_home.dto.Login.LoginResponse;
-import com.example.meat_home.dto.Signup.SignupRequest;
 import com.example.meat_home.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,28 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(new ErrorResponse("Server error", 500));
+        }
+    }
+
+    @PostMapping("/otp-request")
+    public ResponseEntity<?> requestReset(@RequestBody OtpRequest request) {
+        try {
+            authService.requestPasswordReset(request);
+            return ResponseEntity.ok("OTP sent to email: " + request.getEmail());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), 400));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request);
+            return ResponseEntity.ok("Password reset successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage(), 400));
         }
     }
 

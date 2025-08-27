@@ -3,7 +3,9 @@ package com.example.meat_home.controller;
 import com.example.meat_home.dto.Order.CreateOrderDto;
 import com.example.meat_home.dto.Order.OrderDto;
 import com.example.meat_home.dto.Order.UpdateOrderDto;
+import com.example.meat_home.dto.OrderStatus.OrderStatusDto;
 import com.example.meat_home.service.OrderService;
+import com.example.meat_home.service.OrderStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;
-
+    private final OrderStatusService orderStatusService;
     @GetMapping
     public ResponseEntity<List<OrderDto>> getOrders() {
         return ResponseEntity.ok(orderService.getOrders());
@@ -50,4 +52,11 @@ public class OrderController {
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
+
+    // ✅ New endpoint: Get order statuses (the jira sub-task: T4-26 endpoint for any user to get the status history of an order)
+    @GetMapping("/{id}/statuses")
+    public ResponseEntity<List<OrderStatusDto>> getOrderStatuses(@PathVariable Long id) {
+        List<OrderStatusDto> statuses = orderStatusService.findByOrderId(id);
+        return ResponseEntity.ok(statuses);
+    }
 }

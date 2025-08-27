@@ -14,17 +14,7 @@ public class OrderStatusMapper {
         dto.setId(status.getId());
         dto.setCreatedAt(status.getCreatedAt());
         dto.setStatus(status.getStatus());
-//      dto.setOrderId(status.getOrder().getId()); // omit the parent Order in the child DTO, or only include its id to avoid circular mapping.
+      dto.setOrderId(status.getOrder().getId()); // omit the parent Order in the child DTO, or only include its id to avoid circular mapping.
         return dto;
-    }
-
-    public OrderStatusChange toEntity(OrderStatusDto dto) {
-        if (dto == null) return null;
-
-        OrderStatusChange status = new OrderStatusChange();
-        status.setId(dto.getId());
-        status.setCreatedAt(dto.getCreatedAt());
-        status.setStatus(dto.getStatus());
-        return status;
     }
 }

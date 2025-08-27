@@ -14,10 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderStatusDto {
-    @JsonIgnore
     private Long id;
     private LocalDateTime createdAt;
-    @Enumerated(EnumType.STRING)
     private StatusEnum status;
-//    private Long order_id;
+    private Long orderId;
 }

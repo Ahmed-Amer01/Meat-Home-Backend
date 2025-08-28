@@ -21,8 +21,13 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderStatusService orderStatusService;
     @GetMapping
-    public ResponseEntity<List<OrderDto>> getOrders() {
+    public ResponseEntity<List<OrderDto>> getAllOrders() {
         return ResponseEntity.ok(orderService.getOrders());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<OrderDto>> getOrdersForAuthCustomer() {
+        return ResponseEntity.ok(orderService.getOrdersForAuthCustomer());
     }
 
     @GetMapping(value = "/{id}")

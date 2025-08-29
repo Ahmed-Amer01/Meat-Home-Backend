@@ -3,16 +3,16 @@ import com.example.meat_home.dto.Order.CreateOrderDto;
 import com.example.meat_home.dto.Order.OrderDto;
 import com.example.meat_home.dto.Order.UpdateOrderDto;
 import com.example.meat_home.entity.*;
-import com.example.meat_home.repository.CustomerRepository;
-import com.example.meat_home.repository.OrderRepository;
-import com.example.meat_home.repository.ProductRepository;
+import com.example.meat_home.repository.*;
 import com.example.meat_home.util.OrderMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import com.example.meat_home.entity.StatusEnum;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final OrderStatusChangeRepository orderStatusChangeRepository;
 
     /**
      * Retrieves an Order by its ID.
@@ -42,6 +43,50 @@ public class OrderService {
     public List<OrderDto> getOrders() {
         return orderRepository.findAll()
                 .stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+    
+    /**
+     * Retrieves filtered orders based on the provided criteria.
+     *
+     * @param customerId Filter by customer ID (optional)
+     * @param status Filter by order status (optional)
+     * @param startDate Filter by start date (inclusive, optional)
+     * @param endDate Filter by end date (inclusive, optional)
+     * @return list of filtered orders as {@link OrderDto}
+     */
+    public List<OrderDto> getFilteredOrders(Long customerId, StatusEnum status, 
+                                          LocalDateTime startDate, LocalDateTime endDate) {
+        return orderRepository.findWithFilters(customerId, status, startDate, endDate)
+                .stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public OrderDto updateOrderStatus(Long orderId, StatusEnum newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Create status change record
+        OrderStatusChange statusChange = OrderStatusChange.builder()
+                .order(order)
+                .status(newStatus)
+                .build();
+        orderStatusChangeRepository.save(statusChange);
+
+        // Update order's status history
+        order.getOrderStatusChanges().add(statusChange);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDto(order);
+    }
+
+    public List<OrderDto> getOrdersByStatus(StatusEnum status) {
+        return orderRepository.findAll().stream()
+                .filter(order -> order.getOrderStatusChanges().stream()
+                        .anyMatch(change -> change.getStatus() == status))
                 .map(orderMapper::toDto)
                 .toList();
     }
@@ -107,27 +152,105 @@ public class OrderService {
      * @param dto the update data containing product IDs and/or status
      * @return the updated {@link OrderDto}, or {@code null} if the order was not found
      */
+    /**
+     * Cancels an order by its ID.
+     * Only orders that are not already delivered or cancelled can be cancelled.
+     *
+     * @param id the ID of the order to cancel
+     * @return the cancelled order as {@link OrderDto}, or {@code null} if not found or cannot be cancelled
+     */
+    @Transactional
+    public OrderDto cancelOrder(Long id) {
+        Order order = orderRepository.findById(id).orElse(null);
+        if (order == null) {
+            return null;
+        }
+
+        // Check if order is already delivered or cancelled
+        boolean isAlreadyFinal = order.getOrderStatusChanges().stream()
+                .anyMatch(change -> change.getStatus() == StatusEnum.Delivered || 
+                                 change.getStatus() == StatusEnum.Cancelled);
+        
+        if (isAlreadyFinal) {
+            return null; // Cannot cancel already delivered or cancelled orders
+        }
+
+        // Create cancellation status change
+        OrderStatusChange statusChange = OrderStatusChange.builder()
+                .order(order)
+                .status(StatusEnum.Cancelled)
+                .build();
+        
+        orderStatusChangeRepository.save(statusChange);
+        order.getOrderStatusChanges().add(statusChange);
+        order = orderRepository.save(order);
+        
+        return orderMapper.toDto(order);
+    }
+
+    /**
+     * Updates an order with new product quantities and/or status.
+     * Only orders that are not already delivered or cancelled can be updated.
+     *
+     * @param id the ID of the order to update
+     * @param dto the update data containing products with quantities and/or status
+     * @return the updated order as {@link OrderDto}, or {@code null} if not found or cannot be updated
+     */
     @Transactional
     public OrderDto updateOrderPatch(Long id, UpdateOrderDto dto) {
-
         Order order = orderRepository.findById(id).orElse(null);
-        if (order == null) return null;
-
-        if (dto.getProducts_id() != null && !dto.getProducts_id().isEmpty()) {
-            List<Product> products = productRepository.findAllById(dto.getProducts_id());
-            order.setProducts(products);
+        if (order == null) {
+            return null;
         }
 
+        // Check if order is already delivered or cancelled
+        boolean isFinalStatus = order.getOrderStatusChanges().stream()
+                .anyMatch(change -> change.getStatus() == StatusEnum.Delivered || 
+                                 change.getStatus() == StatusEnum.Cancelled);
+        
+        if (isFinalStatus) {
+            return null; // Cannot update already delivered or cancelled orders
+        }
+
+        // Update products if provided
+        if (dto.getProducts() != null && !dto.getProducts().isEmpty()) {
+            // Get all product IDs from the request
+            List<Long> productIds = new ArrayList<>(dto.getProducts().keySet());
+            
+            // Find all products that exist in the database
+            List<Product> products = productRepository.findAllById(productIds);
+            
+            // Create a map of product ID to Product for quick lookup
+            Map<Long, Product> productMap = products.stream()
+                    .collect(Collectors.toMap(Product::getId, product -> product));
+            
+            // Clear existing products and add the new ones with quantities
+            order.getProducts().clear();
+            
+            // Add each product the specified number of times based on quantity
+            for (Map.Entry<Long, Integer> entry : dto.getProducts().entrySet()) {
+                Long productId = entry.getKey();
+                Integer qty = entry.getValue();
+                Product product = productMap.get(productId);
+
+                if (product != null && qty != null && qty > 0) {
+                    order.getProducts().addAll(Collections.nCopies(qty, product));
+                }
+            }
+
+        }
+
+        // Update status if provided
         if (dto.getStatus() != null) {
-            OrderStatusChange os = OrderStatusChange.builder()
+            OrderStatusChange statusChange = OrderStatusChange.builder()
                     .status(dto.getStatus())
-                    .createdAt(LocalDateTime.now())
                     .order(order)
                     .build();
-            order.getOrderStatusChanges().add(os);
+            orderStatusChangeRepository.save(statusChange);
+            order.getOrderStatusChanges().add(statusChange);
         }
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
         return orderMapper.toDto(order);
     }
 

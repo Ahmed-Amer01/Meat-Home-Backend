@@ -6,11 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class UpdateOrderDto {
-    private List<Long> products_id;
+    /**
+     * Map of product IDs to quantities.
+     * The key is the product ID and the value is the quantity.
+     */
+    private Map<Long, Integer> products;
+    
+    /**
+     * Optional status update for the order.
+     * If provided, will add a new status change to the order.
+     */
     private StatusEnum status;
 }

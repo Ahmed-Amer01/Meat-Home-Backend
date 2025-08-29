@@ -23,7 +23,8 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final OrderStatusService orderStatusService;
-  
+
+    // Order APIs Start //
     @GetMapping
     @PreAuthorize("hasRole('CALLCENTER') or hasRole('ADMIN') or hasRole('DELIVERY')")
     public ResponseEntity<List<OrderDto>> getOrders(
@@ -69,6 +70,10 @@ public class OrderController {
         OrderDto updated = orderService.updateOrderPatch(id, dto);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
+    // Order APIs End //
+
+
+    // Order Statuses APIs Start //
 
 
     // ✅ New endpoint: Get order statuses (the jira sub-task: T4-26 endpoint for any user to get the status history of an order)
@@ -118,4 +123,6 @@ public class OrderController {
             ResponseEntity.ok(cancelledOrder) :
             ResponseEntity.notFound().build();
     }
+
+    // Order Statuses APIs End //
 }

@@ -1,4 +1,5 @@
 package com.example.meat_home.service;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.example.meat_home.dto.Order.CreateOrderDto;
 import com.example.meat_home.dto.Order.OrderDto;
 import com.example.meat_home.dto.Order.UpdateOrderDto;
@@ -8,8 +9,9 @@ import com.example.meat_home.util.OrderMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.example.meat_home.entity.StatusEnum;
@@ -41,7 +43,7 @@ public class OrderService {
      * @return a list of mapped {@link OrderDto}
      */
     public List<OrderDto> getOrders() {
-        return orderRepository.findAll()
+   return orderRepository.findAll()
                 .stream()
                 .map(orderMapper::toDto)
                 .toList();
@@ -91,6 +93,11 @@ public class OrderService {
                 .toList();
     }
 
+    public List<OrderDto> getOrdersForAuthCustomer() {
+        // ✅ Extract email from SecurityContext (set by JWT filter)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return orderRepository.findByCustomerEmail(email).stream().map(orderMapper::toDto).toList();
+    }
 
     /**
      * Creates a new Order from the provided {@link CreateOrderDto}.
@@ -108,10 +115,13 @@ public class OrderService {
      */
     @Transactional
     public OrderDto createOrder(CreateOrderDto dto) {
-        if (dto == null) return null;
-        if(dto.getProducts_id().isEmpty()) return null;
-        Customer customer = customerRepository.findById(dto.getCustomer_id()).orElse(null);
-        if(customer == null ) return null;
+        if (dto == null || dto.getProducts_id().isEmpty()) return null;
+
+        // ✅ Extract email from SecurityContext (set by JWT filter)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
         List<Product> products = productRepository.findAllById(dto.getProducts_id());
 
         Order order = Order.builder()

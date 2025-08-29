@@ -10,6 +10,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateOrderDto {
-    private Long customer_id;
     private List<Long> products_id;
 }

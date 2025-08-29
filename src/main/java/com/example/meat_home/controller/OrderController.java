@@ -23,6 +23,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final OrderStatusService orderStatusService;
+  
     @GetMapping
     @PreAuthorize("hasRole('CALLCENTER') or hasRole('ADMIN') or hasRole('DELIVERY')")
     public ResponseEntity<List<OrderDto>> getOrders(
@@ -35,6 +36,11 @@ public class OrderController {
             return ResponseEntity.ok(orderService.getFilteredOrders(customerId, status, startDate, endDate));
         }
         return ResponseEntity.ok(orderService.getOrders());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<OrderDto>> getOrdersForAuthCustomer() {
+        return ResponseEntity.ok(orderService.getOrdersForAuthCustomer());
     }
 
     @GetMapping(value = "/{id}")

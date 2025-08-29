@@ -150,18 +150,7 @@ public class OrderService {
         return true;
     }
 
-    /**
-     * Partially updates an existing Order.
-     * Supports:
-     * <ul>
-     *   <li>Replacing the product list if product IDs are provided.</li>
-     *   <li>Appending a new status change if a status is provided.</li>
-     * </ul>
-     *
-     * @param id  the ID of the order to update
-     * @param dto the update data containing product IDs and/or status
-     * @return the updated {@link OrderDto}, or {@code null} if the order was not found
-     */
+
     /**
      * Cancels an order by its ID.
      * Only orders that are not already delivered or cancelled can be cancelled.

@@ -66,25 +66,6 @@ public class OrderService {
                 .toList();
     }
 
-    @Transactional
-    public OrderDto updateOrderStatus(Long orderId, StatusEnum newStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Create status change record
-        OrderStatusChange statusChange = OrderStatusChange.builder()
-                .order(order)
-                .status(newStatus)
-                .build();
-        orderStatusChangeRepository.save(statusChange);
-
-        // Update order's status history
-        order.getOrderStatusChanges().add(statusChange);
-        order = orderRepository.save(order);
-
-        return orderMapper.toDto(order);
-    }
-
     public List<OrderDto> getOrdersByStatus(StatusEnum status) {
         return orderRepository.findAll().stream()
                 .filter(order -> order.getOrderStatusChanges().stream()
@@ -187,6 +168,25 @@ public class OrderService {
         return orderMapper.toDto(order);
     }
 
+    @Transactional
+    public OrderDto updateOrderStatus(Long orderId, StatusEnum newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Create status change record
+        OrderStatusChange statusChange = OrderStatusChange.builder()
+                .order(order)
+                .status(newStatus)
+                .build();
+        orderStatusChangeRepository.save(statusChange);
+
+        // Update order's status history
+        order.getOrderStatusChanges().add(statusChange);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDto(order);
+    }
+
     /**
      * Updates an order with new product quantities and/or status.
      * Only orders that are not already delivered or cancelled can be updated.
@@ -252,5 +252,4 @@ public class OrderService {
         order = orderRepository.save(order);
         return orderMapper.toDto(order);
     }
-
 }

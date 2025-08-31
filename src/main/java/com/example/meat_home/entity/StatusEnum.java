@@ -4,5 +4,7 @@ public enum StatusEnum {
     Preparing,
     Ready,
     OnWay,
-    Delivered
+    Delivered,
+    Pending,
+    Cancelled
 }

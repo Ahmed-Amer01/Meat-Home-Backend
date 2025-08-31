@@ -2,7 +2,9 @@ package com.example.meat_home.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder.Default;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,5 +34,8 @@ public class Product {
     private Category category;
 
     @ManyToMany(mappedBy = "products")
-    private List<Order> orders;
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
+
+
 }

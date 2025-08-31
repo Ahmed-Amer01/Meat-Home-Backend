@@ -30,4 +30,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate
     );
+
+    List<Order> findByCustomerId(Long customerId);
+    boolean existsByIdAndCustomerId(Long orderId, Long customerId);
+    Order findByid(Long orderId);
 }

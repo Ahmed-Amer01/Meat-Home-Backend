@@ -1,11 +1,11 @@
 {
 	"info": {
-		"_postman_id": "21cc1deb-ed76-4d4a-8209-4616e8d065f8",
+		"_postman_id": "2a1b412d-65d1-4d74-b3ab-ac27079021e0",
 		"name": "API Documentation",
 		"description": "[http://localhost:8080/api/orders](http://localhost:8080/api/orders)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37287122",
-		"_collection_link": "https://www.postman.com/nour-shaban/workspace/spring-boot/collection/37287122-21cc1deb-ed76-4d4a-8209-4616e8d065f8?action=share&source=collection_link&creator=37287122"
+		"_exporter_id": "40414565",
+		"_collection_link": "https://i-prefer-to-be-alone.postman.co/workspace/SpringBoot~9964f1d7-c982-4657-8e82-ce78835683a2/collection/40414565-2a1b412d-65d1-4d74-b3ab-ac27079021e0?action=share&source=collection_link&creator=40414565"
 	},
 	"item": [
 		{
@@ -1459,6 +1459,64 @@
 								"status"
 							]
 						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review By Id",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Enquiry",
+			"item": [
+				{
+					"name": "Create Enquiry",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Enquiries",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Respond to an enquiry",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Close enquiry",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}

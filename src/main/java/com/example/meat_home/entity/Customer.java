@@ -48,4 +48,7 @@ public class Customer {
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
 
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderReview> reviews = new ArrayList<>();
 }

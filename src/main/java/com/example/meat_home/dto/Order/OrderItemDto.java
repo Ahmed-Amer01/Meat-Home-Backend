@@ -1,15 +1,14 @@
 package com.example.meat_home.dto.Order;
 
+import com.example.meat_home.dto.Product.ProductDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderDto {
-    private Map<Long, Integer> products; // productId -> quantity
+public class OrderItemDto {
+    private ProductDto product;
+    private Integer quantity;
 }

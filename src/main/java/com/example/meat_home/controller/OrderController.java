@@ -28,10 +28,10 @@ public class OrderController {
     @GetMapping
     @PreAuthorize("hasRole('CALLCENTER') or hasRole('ADMIN') or hasRole('DELIVERY')")
     public ResponseEntity<List<OrderDto>> getOrders(
-            @RequestParam(required = false) Long customerId,
-            @RequestParam(required = false) StatusEnum status,
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate) {
+            @RequestParam(required = false, name = "customer_id") Long customerId,
+            @RequestParam(required = false, name = "status") StatusEnum status,
+            @RequestParam(required = false, name = "start_date") LocalDateTime startDate,
+            @RequestParam(required = false, name = "end_date") LocalDateTime endDate) {
         
         if (customerId != null || status != null || startDate != null || endDate != null) {
             return ResponseEntity.ok(orderService.getFilteredOrders(customerId, status, startDate, endDate));
@@ -45,6 +45,7 @@ public class OrderController {
     }
 
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasRole('CALLCENTER') or hasRole('ADMIN') or hasRole('DELIVERY')")
     public ResponseEntity<OrderDto> getOrder(@PathVariable Long id) {
         OrderDto order = orderService.getOrderById(id);
         return order != null ? ResponseEntity.ok(order) : ResponseEntity.notFound().build();
@@ -78,6 +79,7 @@ public class OrderController {
 
     // ✅ New endpoint: Get order statuses (the jira sub-task: T4-26 endpoint for any user to get the status history of an order)
     @GetMapping("/{id}/statuses")
+    @PreAuthorize("hasRole('CALLCENTER') or hasRole('ADMIN') or hasRole('DELIVERY')")
     public ResponseEntity<List<OrderStatusDto>> getOrderStatuses(@PathVariable Long id) {
         List<OrderStatusDto> statuses = orderStatusService.findByOrderId(id);
         return ResponseEntity.ok(statuses);

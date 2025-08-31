@@ -66,32 +66,12 @@ public class OrderService {
                 .toList();
     }
 
-    @Transactional
-    public OrderDto updateOrderStatus(Long orderId, StatusEnum newStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Create status change record
-        OrderStatusChange statusChange = OrderStatusChange.builder()
-                .order(order)
-                .status(newStatus)
-                .build();
-        orderStatusChangeRepository.save(statusChange);
-
-        // Update order's status history
-        order.getOrderStatusChanges().add(statusChange);
-        order = orderRepository.save(order);
-
-        return orderMapper.toDto(order);
-    }
-
     public List<OrderDto> getOrdersByStatus(StatusEnum status) {
-        return orderRepository.findAll().stream()
-                .filter(order -> order.getOrderStatusChanges().stream()
-                        .anyMatch(change -> change.getStatus() == status))
+        return orderRepository.findByStatus(status).stream()
                 .map(orderMapper::toDto)
                 .toList();
     }
+
 
     public List<OrderDto> getOrdersForAuthCustomer() {
         // ✅ Extract email from SecurityContext (set by JWT filter)
@@ -115,27 +95,57 @@ public class OrderService {
      */
     @Transactional
     public OrderDto createOrder(CreateOrderDto dto) {
-        if (dto == null || dto.getProducts_id().isEmpty()) return null;
+        if (dto == null || dto.getProducts() == null || dto.getProducts().isEmpty()) {
+            return null;
+        }
 
         // ✅ Extract email from SecurityContext (set by JWT filter)
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        List<Product> products = productRepository.findAllById(dto.getProducts_id());
+        // Get all product IDs from the request
+        List<Long> productIds = new ArrayList<>(dto.getProducts().keySet());
 
+        // Find all products from DB
+        List<Product> products = productRepository.findAllById(productIds);
+
+        // Map productId -> Product
+        Map<Long, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId,product -> product));
+
+        // Build order products (flatten with quantities)
+        List<Product> orderedProducts = new ArrayList<>();
+        for (Map.Entry<Long, Integer> entry : dto.getProducts().entrySet()) {
+            Long productId = entry.getKey();
+            Integer qty = entry.getValue();
+            Product product = productMap.get(productId);
+
+            if (product != null && qty != null && qty > 0) {
+                orderedProducts.addAll(Collections.nCopies(qty, product));
+            }
+        }
+
+        // Build order
         Order order = Order.builder()
-                    .products(products)
-                    .customer(customer)
-                    .build();
+                .products(orderedProducts)
+                .customer(customer)
+                .build();
 
-        OrderStatusChange os = OrderStatusChange.builder().createdAt(LocalDateTime.now()).status(StatusEnum.Preparing).order(order).build();
+        // Add initial status
+        OrderStatusChange os = OrderStatusChange.builder()
+                .createdAt(LocalDateTime.now())
+                .status(StatusEnum.Preparing)
+                .order(order)
+                .build();
 
         order.getOrderStatusChanges().add(os);
+
         orderRepository.save(order);
 
         return orderMapper.toDto(order);
     }
+
 
     /**
      * Deletes an Order by its ID.
@@ -178,12 +188,30 @@ public class OrderService {
         OrderStatusChange statusChange = OrderStatusChange.builder()
                 .order(order)
                 .status(StatusEnum.Cancelled)
+                .createdAt(LocalDateTime.now())
                 .build();
-        
-        orderStatusChangeRepository.save(statusChange);
+
         order.getOrderStatusChanges().add(statusChange);
-        order = orderRepository.save(order);
+        orderRepository.save(order); // cascade saves statusChange
         
+        return orderMapper.toDto(order);
+    }
+
+    @Transactional
+    public OrderDto updateOrderStatus(Long orderId, StatusEnum newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Create status change record
+        OrderStatusChange statusChange = OrderStatusChange.builder()
+                .order(order)
+                .status(newStatus)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        order.getOrderStatusChanges().add(statusChange);
+        orderRepository.save(order);
+
         return orderMapper.toDto(order);
     }
 
@@ -236,7 +264,6 @@ public class OrderService {
                     order.getProducts().addAll(Collections.nCopies(qty, product));
                 }
             }
-
         }
 
         // Update status if provided
@@ -244,13 +271,12 @@ public class OrderService {
             OrderStatusChange statusChange = OrderStatusChange.builder()
                     .status(dto.getStatus())
                     .order(order)
+                    .createdAt(LocalDateTime.now())
                     .build();
-            orderStatusChangeRepository.save(statusChange);
             order.getOrderStatusChanges().add(statusChange);
         }
 
         order = orderRepository.save(order);
         return orderMapper.toDto(order);
     }
-
 }

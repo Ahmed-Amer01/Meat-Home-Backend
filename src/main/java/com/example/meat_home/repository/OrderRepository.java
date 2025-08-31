@@ -12,7 +12,9 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerEmail(String email);
-  
+    @Query("SELECT o FROM Order o JOIN o.orderStatusChanges osc WHERE osc.status = :status")
+    List<Order> findByStatus(@Param("status") StatusEnum status);
+
     @Query("""
     SELECT DISTINCT o FROM Order o
     LEFT JOIN o.orderStatusChanges sc

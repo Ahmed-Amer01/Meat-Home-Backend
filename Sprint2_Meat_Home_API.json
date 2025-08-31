@@ -333,7 +333,8 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let response = pm.response.json();\r",
+											"pm.environment.set(\"token\", response.token);"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -710,7 +711,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"products_id\": [2, 4]\r\n}\r\n",
+									"raw": "{\r\n  \"products\": {\r\n    \"1\": 2,\r\n    \"2\": 1,\r\n    \"5\": 3\r\n  }\r\n}\r\n\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1237,14 +1238,14 @@
 							"raw": "{\r\n  \"products_id\": [2, 4],\r\n  \"status\": \"Delivered\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "{{URL}}/api/orders/7",
+							"raw": "{{URL}}/api/orders/9",
 							"host": [
 								"{{URL}}"
 							],
 							"path": [
 								"api",
 								"orders",
-								"7"
+								"9"
 							]
 						}
 					},

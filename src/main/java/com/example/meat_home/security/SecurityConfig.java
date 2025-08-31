@@ -33,7 +33,7 @@ public class SecurityConfig {
                 // .requestMatchers("/admin/**").hasRole("ADMIN")            // for admin role only
                 // .requestMatchers("/call-center/**").hasRole("CALLCENTER") // for call center role only
                 // .requestMatchers("/delivery/**").hasRole("DELIVERY")      // for delivery role only
-                // .requestMatchers("/customer/**").hasRole("CUSTOMER")      // for customer role only
+                 .requestMatchers("/enquiries/**").permitAll()
                 .anyRequest().authenticated()                             // any other request needs auth
             )
             .addFilterBefore(jwtAuthenticationFilter,
